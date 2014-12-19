@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Engineering Statics - Load analysis of truss structures</title>
+
+		<meta name="description" content="Load analysis of truss structures">
+		<meta name="author" content="Nelson Brown">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/moon.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Engineering Statics</h1>
+					<h3>Load analysis of truss structures</h3>
+					<p>
+						$$ \sum{ F_x } = 0, \sum{ F_y } = 0, \sum{ M } = 0 $$
+					</p>
+					<br />
+					<p>
+						<small><a href="https://plus.google.com/+NelsonBrown">Nelson Brown</a></small>
+					</p>
+				</section>
+
+				<section>
+					<div class="reveal">
+					<h2>GFSA outline</h2>
+						<ol>
+							<li class="fragment"><strong>Given</strong></li>
+							<li class="fragment"><strong>Find</strong></li>
+							<li class="fragment"><strong>Solution</strong></li>
+							<li class="fragment"><strong>Answer</strong></li>
+						</ol>
+						<ul style="list-style-type:none">
+							<li class="fragment">Truss drawing, dimensions</li>
+							<li class="fragment">External and internal forces</li>
+							<li class="fragment">Free Body Diagrams, equilibrium equations</li>
+							<li class="fragment">Computed equilibrium forces</li>
+						</ul>
+						<br /><br /><br />
+						</div>
+					<div class="fragment reveal">
+					<h3>Static equilibrium:</h3>
+					<p>Assume all forces and moments sum to zero. <em>No acceleration!</em></p>
+					</div>
+					<aside class="notes">
+						Thanks to Mark French and his YouTube videos.
+					</aside>
+				</section>
+				
+				<!-- Example of nested vertical slides -->
+				<section>
+					<section id="Given">
+						<h2>Given: Simple Truss</h2>
+						<svg width="50%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-100 -200 500 300">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='h' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='vectorFill' d='M0,0 V4 L2,2 Z' />
+							</marker>
+							<marker id='rh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='reactionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<path id='member' class='member' d="M0,0 200,-100 300,0 Z" marker-start='url(#c)' marker-mid='url(#c)' marker-end='url(#c)' stroke-width='5' stroke-linejoin="round" fill='none' stroke='black' />
+						<g>
+							<text class='memberFill' x="-40" y="-10">A</text>
+							<text class='memberFill' x="220" y="-100">B</text>
+							<text class='memberFill' x="315" y="0">C</text>
+						</g>
+						<g class="fragment">
+							<path id='vector' class='vector' marker-end='url(#h)' stroke-width='8' fill='none' stroke='green' d='M200,-176 200,-116' />
+							<text class='vectorFill' x="210" y="-130">600 N</text>
+						</g>
+						<path id='pin' class='member' d="M0,0 18,32 -18,32 Z" fill='none' stroke='black' />
+						<g id="floor" transform="translate(-30,38)">
+							<path class='member' d="M0,0 70,0" id="floor-surface" />
+							<path class='hatch' d="M 0,10 7,0" id="hatch" />
+							<use transform="translate(10,0)" xlink:href="#hatch" />
+							<use transform="translate(20,0)" xlink:href="#hatch" />
+							<use transform="translate(30,0)" xlink:href="#hatch" />
+							<use transform="translate(40,0)" xlink:href="#hatch" />
+							<use transform="translate(50,0)" xlink:href="#hatch" />
+							<use transform="translate(60,0)" xlink:href="#hatch" />
+						</g>
+						<use transform="translate(300,0)" xlink:href="#floor" />
+						<circle id="roller" class="member" cx="300" cy="20" r="15" />
+						<g class="fragment">
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M0,0 0,-20' />
+							<text class='reactionFill' x="10" y="-40">?</text>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M300,0 300,-40' />
+							<text class='reactionFill' x="320" y="-60">?</text>
+						</g>
+						<g>
+							<text class='tensionFill' x="120" y="-50" font-size="small">1.118 m</text>
+							<text class='tensionFill' x="150" y="-10" font-size="small">1.0 m</text>
+							<path class='tension' stroke-dasharray="5,5" d="M200,0 200,-100" />
+							<text class='tensionFill' x="220" y="-10" font-size="small">0.5 m</text>
+							<text class='tensionFill' x="240" y="-70" font-size="small">0.707 m</text>
+						</g>
+					</svg>
+					
+					<svg class="fragment fbd" width="20%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-100 -150 260 300">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='fh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='memberFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<g>
+							<path id='frame' class='member' marker-end='url(#fh)' stroke-width='8' fill='none' stroke='green' d='M0,0 0,-120' />
+							<path id='frame' class='member' marker-end='url(#fh)' stroke-width='8' fill='none' stroke='green' d='M0,0 120,0' />
+						</g>
+						<text class='memberFill' x="110" y="40">+X</text>
+						<text class='memberFill' x="20" y="-110">+Y</text>
+						<text class='memberFill' x="-50" y="30">+M</text>
+						<path class='member' marker-end='url(#fh)' d="M-55 -55 A 55 55, 1, 1, 0, 55 55" fill="none" stroke="blue" />
+					</svg>
+					<h3 class="fragment">Find the reaction forces (external forces).</h3>
+					</section>
+					<section id="fbd">
+						<h2>Solution: Free Body Diagram</h2>
+						<svg width="50%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-100 -200 500 300">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='h' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='vectorFill' d='M0,0 V4 L2,2 Z' />
+							</marker>
+							<marker id='rh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='reactionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<path id='member' class='member' d="M0,0 200,-100 300,0 Z" marker-start='url(#c)' marker-mid='url(#c)' marker-end='url(#c)' stroke-width='5' stroke-linejoin="round" fill='none' stroke='black' />
+						<g>
+							<text class='memberFill' x="-40" y="-10">A</text>
+							<text class='memberFill' x="220" y="-100">B</text>
+							<text class='memberFill' x="315" y="0">C</text>
+						</g>
+						<g>
+							<path id='vector' class='vector' marker-end='url(#h)' stroke-width='8' fill='none' stroke='green' d='M200,-176 200,-116' />
+							<text class='vectorFill' x="210" y="-130">600 N</text>
+						</g>
+						
+						<g class="fragment fade-out">
+						<path id='pin' class='member' d="M0,0 18,32 -18,32 Z" fill='none' stroke='black' />
+						<g id="floor" transform="translate(-30,38)">
+							<path class='member' d="M0,0 70,0" id="floor-surface" />
+							<path class='hatch' d="M 0,10 7,0" id="hatch" />
+							<use transform="translate(10,0)" xlink:href="#hatch" />
+							<use transform="translate(20,0)" xlink:href="#hatch" />
+							<use transform="translate(30,0)" xlink:href="#hatch" />
+							<use transform="translate(40,0)" xlink:href="#hatch" />
+							<use transform="translate(50,0)" xlink:href="#hatch" />
+							<use transform="translate(60,0)" xlink:href="#hatch" />
+						</g>
+						</g>
+
+						<g class="fragment">
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M-66,0 -16,0' />
+							<text class='reactionFill' x="-90" y="-20">F
+								<tspan baseline-shift="sub" font-size="small">Ax</tspan>
+							</text>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M0,46 0,16' />
+							<text class='reactionFill' x="20" y="40">F
+								<tspan baseline-shift="sub" font-size="small">Ay</tspan>
+							</text>
+						</g>
+
+						<g class="fragment fade-out">
+						<use transform="translate(300,0)" xlink:href="#floor" />
+						<circle id="roller" class="member" cx="300" cy="20" r="15" />
+						</g>
+						
+						<g class="fragment">
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M300,46 300,16' />
+							<text class='reactionFill' x="320" y="40">F
+								<tspan baseline-shift="sub" font-size="small">Cy</tspan>
+							</text>
+						</g>
+					</svg>
+					<p>Replace pin and roller with reaction force vectors.</p>
+					</section>
+					<section id="equations">
+						<svg width="40%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-100 -200 500 300">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='h' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='vectorFill' d='M0,0 V4 L2,2 Z' />
+							</marker>
+							<marker id='rh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='reactionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<path id='member' class='member' d="M0,0 200,-100 300,0 Z" marker-start='url(#c)' marker-mid='url(#c)' marker-end='url(#c)' stroke-width='5' stroke-linejoin="round" fill='none' stroke='black' />
+						<g>
+							<text class='memberFill' x="-40" y="-10">A</text>
+							<text class='memberFill' x="220" y="-100">B</text>
+							<text class='memberFill' x="315" y="0">C</text>
+						</g>
+						<g>
+							<path id='vector' class='vector' marker-end='url(#h)' stroke-width='8' fill='none' stroke='green' d='M200,-176 200,-116' />
+							<text class='vectorFill' x="210" y="-130">600 N</text>
+						</g>
+						
+						<g>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M-66,0 -16,0' />
+							<text class='reactionFill' x="-90" y="-20">F
+								<tspan baseline-shift="sub" font-size="small">Ax</tspan>
+							</text>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M0,46 0,16' />
+							<text class='reactionFill' x="20" y="40">F
+								<tspan baseline-shift="sub" font-size="small">Ay</tspan>
+							</text>
+						</g>
+
+						<g>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M300,46 300,16' />
+							<text class='reactionFill' x="320" y="40">F
+								<tspan baseline-shift="sub" font-size="small">Cy</tspan>
+							</text>
+						</g>
+					</svg>
+					
+					<svg class="fragment fbd" width="20%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-100 -150 260 300">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='fh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='memberFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<g>
+							<path id='frame' class='member' marker-end='url(#fh)' stroke-width='8' fill='none' stroke='green' d='M0,0 0,-120' />
+							<path id='frame' class='member' marker-end='url(#fh)' stroke-width='8' fill='none' stroke='green' d='M0,0 120,0' />
+						</g>
+						<text class='memberFill' x="110" y="40">+X</text>
+						<text class='memberFill' x="20" y="-110">+Y</text>
+						<text class='memberFill' x="-50" y="30">+M</text>
+						<path class='member' marker-end='url(#fh)' d="M-55 -55 A 55 55, 1, 1, 0, 55 55" fill="none" stroke="blue" />
+					</svg>
+					<table width="100%">
+						<tr>
+							<td width="20%">
+								<p class="fragment">$$\sum{F_x}=0$$</p>
+								<p class="fragment">$$\boxed{F_{Ax}=0}$$</p>
+							</td>
+							<td width="40%">
+								<p class="fragment">$$\sum{F_y}=0$$</p>
+								<p class="fragment">$$F_{Ay}+F_{Cy}-600\mathrm{N}=0$$</p>
+								<p class="fragment">$$F_{Ay}+F_{Cy}=600\mathrm{N}$$</p>
+							</td>
+							<td width="40%">
+								<p class="fragment">$$\sum{M_A}=0$$</p>
+								<p class="fragment">$$600\mathrm{N}\cdot\mathrm{m}+1.5\mathrm{m}\cdot F_{Cy}=0$$</p>
+								<p class="fragment">$$F_{Cy}=\frac{600\mathrm{N}\cdot\mathrm{m}}{1.5\mathrm{m}}$$</p>
+								<p class="fragment">$$\boxed{F_{Cy}=400\mathrm{N}}$$</p>
+							</td>
+						</tr>
+							<tr>
+							<td>
+
+							</td>
+							<td>
+								<p class="fragment">$$F_{Ay}+400=600\mathrm{N}$$</p>
+								<p class="fragment">$$\boxed{F_{Ay}=200\mathrm{N}}$$</p>
+							</td>
+							<td>
+							</td>
+						</tr>
+					
+					
+					</table>
+					</section>
+				</section>
+				<section>
+					<section>
+					<h2>Internal Forces: Joint A</h2>
+					
+					<svg width="40%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-150 -200 500 400">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='h' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='vectorFill' d='M0,0 V4 L2,2 Z' />
+							</marker>
+							<marker id='rh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='reactionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+							<marker id='th' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='tensionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<g>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M-132,0 -32,0' />
+							<text class='reactionFill' x="-150" y="-30">F
+								<tspan baseline-shift="sub" font-size="small">Ax</tspan>
+							</text>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M0,120 0,32' />
+							<text class='reactionFill' x="20" y="120">F
+								<tspan baseline-shift="sub" font-size="small">Ay</tspan>
+							</text>
+						</g>
+						<g>
+							<path id='vector' class='tension' marker-end='url(#th)' stroke-width='8' fill='none' stroke='green' d='M16,-8 120,-60' />
+							<text class='tensionFill' x="120" y="-100">F
+								<tspan baseline-shift="sub" font-size="small">AB</tspan>
+							</text>
+						</g>
+						<g>
+							<path id='vector' class='tension' marker-end='url(#th)' stroke-width='8' fill='none' stroke='green' d='M16,0 132,0' />
+							<text class='tensionFill' x="60" y="40">F
+								<tspan baseline-shift="sub" font-size="small">AC</tspan>
+							</text>
+						</g>
+						<text class='memberFill' x="90" y="-20">26.6°</text>
+						<text class='memberFill' x="-10" y="-30">A</text>
+						<circle id="joint" class="member" cx="0" cy="0" r="5" />
+					</svg>
+					
+						<svg width="40%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-100 -200 500 300">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='h' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='vectorFill' d='M0,0 V4 L2,2 Z' />
+							</marker>
+							<marker id='rh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='reactionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<path id='member' class='member' d="M0,0 200,-100 300,0 Z" marker-start='url(#c)' marker-mid='url(#c)' marker-end='url(#c)' stroke-width='5' stroke-linejoin="round" fill='none' stroke='black' />
+						<g>
+							<text class='memberFill' x="-40" y="-10">A</text>
+							<text class='memberFill' x="220" y="-100">B</text>
+							<text class='memberFill' x="315" y="0">C</text>
+						</g>
+						<g>
+							<path id='vector' class='vector' marker-end='url(#h)' stroke-width='8' fill='none' stroke='green' d='M200,-176 200,-116' />
+							<text class='vectorFill' x="210" y="-130">600 N</text>
+						</g>
+						
+						<g>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M-66,0 -16,0' />
+							<text class='reactionFill' x="-90" y="-20">F
+								<tspan baseline-shift="sub" font-size="small">Ax</tspan>
+							</text>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M0,46 0,16' />
+							<text class='reactionFill' x="20" y="40">F
+								<tspan baseline-shift="sub" font-size="small">Ay</tspan>
+							</text>
+						</g>
+
+						<g>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M300,46 300,16' />
+							<text class='reactionFill' x="320" y="40">F
+								<tspan baseline-shift="sub" font-size="small">Cy</tspan>
+							</text>
+						</g>
+					</svg>
+
+					
+
+					</section>
+					<section>
+					<svg width="40%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-150 -200 500 400">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='h' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='vectorFill' d='M0,0 V4 L2,2 Z' />
+							</marker>
+							<marker id='rh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='reactionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+							<marker id='th' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='tensionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<g>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M-132,0 -32,0' />
+							<text class='reactionFill' x="-150" y="-30">F
+								<tspan baseline-shift="sub" font-size="small">Ax</tspan>
+							</text>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M0,120 0,32' />
+							<text class='reactionFill' x="20" y="120">F
+								<tspan baseline-shift="sub" font-size="small">Ay</tspan>
+							</text>
+						</g>
+						<g>
+							<path id='vector' class='tension' marker-end='url(#th)' stroke-width='8' fill='none' stroke='green' d='M16,-8 120,-60' />
+							<text class='tensionFill' x="120" y="-100">F
+								<tspan baseline-shift="sub" font-size="small">AB</tspan>
+							</text>
+						</g>
+						<g>
+							<path id='vector' class='tension' marker-end='url(#th)' stroke-width='8' fill='none' stroke='green' d='M16,0 132,0' />
+							<text class='tensionFill' x="60" y="40">F
+								<tspan baseline-shift="sub" font-size="small">AC</tspan>
+							</text>
+						</g>
+						<text class='memberFill' x="90" y="-20">26.6°</text>
+						<text class='memberFill' x="-10" y="-30">A</text>
+						<circle id="joint" class="member" cx="0" cy="0" r="5" />
+					</svg>
+					<ul style="list-style-type:none">
+						<li class="fragment">$$\sum{F_y}=0$$</li>
+						<li class="fragment">$$F_{Ay}+F_{AB}\sin{26.6°}=0$$</li>
+						<li class="fragment">$$F_{AB}=\frac{-200\mathrm{N}}{\sin{26.6°}}$$</li>
+						<li class="fragment">$\boxed{F_{AB}=-447\mathrm{N}}$ (compression)</li>
+						<li class="fragment">$$\sum{F_x}=0$$</li>
+						<li class="fragment">$$F_{Ax}+F_{AC}+F_{AB}\cos{26.6°}=0$$</li>
+						<li class="fragment">$$0+F_{AC}-447\mathrm{N}\cos{26.6°}=0$$</li>
+						<li class="fragment">$\boxed{F_{AC}=400\mathrm{N}}$ (tension)</li>
+					</ul>
+					
+					</section>
+				</section>
+				<section>
+					<section>
+					<h2>Internal Forces: Joint C</h2>
+											<svg width="40%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-100 -200 500 300">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='h' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='vectorFill' d='M0,0 V4 L2,2 Z' />
+							</marker>
+							<marker id='rh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='reactionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<path id='member' class='member' d="M0,0 200,-100 300,0 Z" marker-start='url(#c)' marker-mid='url(#c)' marker-end='url(#c)' stroke-width='5' stroke-linejoin="round" fill='none' stroke='black' />
+						<g>
+							<text class='memberFill' x="-40" y="-10">A</text>
+							<text class='memberFill' x="220" y="-100">B</text>
+							<text class='memberFill' x="315" y="0">C</text>
+						</g>
+						<g>
+							<path id='vector' class='vector' marker-end='url(#h)' stroke-width='8' fill='none' stroke='green' d='M200,-176 200,-116' />
+							<text class='vectorFill' x="210" y="-130">600 N</text>
+						</g>
+						
+						<g>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M-66,0 -16,0' />
+							<text class='reactionFill' x="-90" y="-20">F
+								<tspan baseline-shift="sub" font-size="small">Ax</tspan>
+							</text>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M0,46 0,16' />
+							<text class='reactionFill' x="20" y="40">F
+								<tspan baseline-shift="sub" font-size="small">Ay</tspan>
+							</text>
+						</g>
+
+						<g>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M300,46 300,16' />
+							<text class='reactionFill' x="320" y="40">F
+								<tspan baseline-shift="sub" font-size="small">Cy</tspan>
+							</text>
+						</g>
+					</svg>
+					
+					<svg width="40%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-200 -200 400 400">
+					<defs>
+						<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+							<circle class="dot" cx="5" cy="5" r="1" />
+						</marker>
+						<marker id='h' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+							<!-- triangle pointing right (+x) -->
+							<path class='vectorFill' d='M0,0 V4 L2,2 Z' />
+						</marker>
+						<marker id='rh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+							<!-- triangle pointing right (+x) -->
+							<path class='reactionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+						</marker>
+						<marker id='th' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+							<!-- triangle pointing right (+x) -->
+							<path class='tensionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+						</marker>
+					</defs>
+					<g>
+						<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M0,120 0,32' />
+						<text class='reactionFill' x="20" y="120">F
+							<tspan baseline-shift="sub" font-size="small">Cy</tspan>
+						</text>
+					</g>
+					<g>
+						<path id='vector' class='tension' marker-end='url(#th)' stroke-width='8' fill='none' stroke='green' d='M-16,-16 -100,-100' />
+						<text class='tensionFill' x="-50" y="-90">F
+							<tspan baseline-shift="sub" font-size="small">BC</tspan>
+						</text>
+					</g>
+					<g>
+						<path id='vector' class='tension' marker-end='url(#th)' stroke-width='8' fill='none' stroke='green' d='M-16,0 -132,0' />
+						<text class='tensionFill' x="-90" y="40">F
+							<tspan baseline-shift="sub" font-size="small">AC</tspan>
+						</text>
+					</g>
+					<text class='memberFill' x="-110" y="-20">45°</text>
+					<text class='memberFill' x="-10" y="-30">C</text>
+					<circle id="joint" class="member" cx="0" cy="0" r="5" />
+				</svg>
+
+					</section>
+					<section>
+						<table class="reveal"><tr><td width="50%">
+					<svg width="80%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-150 -150 300 300">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='h' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='vectorFill' d='M0,0 V4 L2,2 Z' />
+							</marker>
+							<marker id='rh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='reactionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+							<marker id='th' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='tensionFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<g>
+							<path id='vector' class='reaction' marker-end='url(#rh)' stroke-width='8' fill='none' stroke='green' d='M0,120 0,32' />
+							<text class='reactionFill' x="20" y="120">F
+								<tspan baseline-shift="sub" font-size="small">Cy</tspan>
+							</text>
+						</g>
+						<g>
+							<path id='vector' class='tension' marker-end='url(#th)' stroke-width='8' fill='none' stroke='green' d='M-16,-16 -100,-100' />
+							<text class='tensionFill' x="-50" y="-90">F
+								<tspan baseline-shift="sub" font-size="small">BC</tspan>
+							</text>
+						</g>
+						<g>
+							<path id='vector' class='tension' marker-end='url(#th)' stroke-width='8' fill='none' stroke='green' d='M-16,0 -132,0' />
+							<text class='tensionFill' x="-90" y="40">F
+								<tspan baseline-shift="sub" font-size="small">AC</tspan>
+							</text>
+						</g>
+						<text class='memberFill' x="-110" y="-20">45°</text>
+						<text class='memberFill' x="-10" y="-30">C</text>
+						<circle id="joint" class="member" cx="0" cy="0" r="5" />
+					</svg>
+					</td>
+					<td width="10%">
+				
+					<svg class="fragment fbd" width="100%" class='fbd' xmlns="http://www.w3.org/2000/svg" viewBox="-100 -150 260 300">
+						<defs>
+							<marker id="c" markerWidth="8" markerHeight="8" refx="5" refy="5">
+								<circle class="dot" cx="5" cy="5" r="1" />
+							</marker>
+							<marker id='fh' orient="auto" markerWidth='4' markerHeight='4' refX='0.1' refY='2'>
+								<!-- triangle pointing right (+x) -->
+								<path class='memberFill' d='M0,0 V4 L2,2 Z' fill="green" />
+							</marker>
+						</defs>
+						<g>
+							<path id='frame' class='member' marker-end='url(#fh)' stroke-width='8' fill='none' stroke='green' d='M0,0 0,-120' />
+							<path id='frame' class='member' marker-end='url(#fh)' stroke-width='8' fill='none' stroke='green' d='M0,0 120,0' />
+						</g>
+						<text class='memberFill' x="110" y="40">+X</text>
+						<text class='memberFill' x="20" y="-110">+Y</text>
+						<text class='memberFill' x="-50" y="30">+M</text>
+						<path class='member' marker-end='url(#fh)' d="M-55 -55 A 55 55, 1, 1, 0, 55 55" fill="none" stroke="blue" />
+					</svg>
+					</td>
+					<td width="40%">
+					<ul style="list-style-type:none">
+						<li class="fragment">$$\sum{F_y}=0$$</li>
+						<li class="fragment">$$F_{Cy}+F_{BC}\sin{45°}=0$$</li>
+						<li class="fragment">$$F_{BC}=\frac{-400\mathrm{N}}{\sin{45°}}$$</li>
+						<li class="fragment">$\boxed{F_{BC}=-566\mathrm{N}}$ (compression)</li>
+					</ul>
+					</td></tr></table>
+					</section>
+				</section>
+				<section>
+					<h2>Answer</h2>
+					<h3>Reaction forces</h3>
+					<center><table>
+					<tr>
+						<td>$$F_{Ax}$$</td><td>$$0$$</td>
+					</tr>
+					<tr>
+						<td>$$F_{Ay}$$</td><td> $$200\mathrm{N}$$</td>
+					</tr>
+					<tr>
+						<td>$$F_{Cy}$$</td><td>$$400\mathrm{N}$$</td>
+					</tr>
+					</table></center>
+					<br />
+					<h3>Internal forces</h3>
+					<center><table>
+					<tr>
+						<td>$$F_{AB}$$</td><td>$$447\mathrm{N}$$</td><td>compression</td>
+					</tr>
+					<tr>
+						<td>$$F_{BC}$$</td><td>$$566\mathrm{N}$$</td><td>compression</td>
+					</tr>
+					<tr>
+						<td>$$F_{AC}$$</td><td>$$400\mathrm{N}$$</td><td>tension</td>
+					</tr>
+					</table></center>
+					
+			    </section>
+				<section>
+					<h1>THE END</h1>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				// The "normal" size of the presentation, aspect ratio will be preserved
+				// when the presentation is scaled to fit different resolutions. Can be
+				// specified using percentage units.
+				width:  "100%",
+				height: "100%",
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				math: {
+					mathjax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js',
+//					mathjax: 'MathJax/MathJax.js',
+					config: 'TeX-AMS_HTML-full'  // See http://docs.mathjax.org/en/latest/config-files.html
+				},
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/math/math.js', async: true }
+				]
+				
+				});
+
+		</script>
+
+	</body>
+</html>
