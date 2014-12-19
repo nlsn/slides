@@ -1,0 +1,20 @@
+/**
+ * Colors for statics diagrams on a dark background
+ * Author: Nelson Brown
+ */
+
+/*********************************************
+ * SVG diagram
+ *********************************************/
+.fbd .vectorFill {fill: orange;}
+.fbd .vector {stroke: orange; fill: orange;}
+.fbd .reactionFill {fill: green;}
+.fbd .reaction {stroke: green; fill: green;}
+.fbd .tensionFill { fill: cyan;}
+.fbd .tension {stroke: cyan; fill: cyan;}
+.fbd .member {stroke: #eee8d5; stroke-width: 5;
+    stroke-linejoin: round; fill: none;}
+.fbd .memberFill {fill: #eee8d5;}
+.fbd .dot {fill: #eee8d5;}
+.fbd .hatch {fill:none;stroke:#eee8d5;
+    stroke-width:3; stroke-linecap:round;}
